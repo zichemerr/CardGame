@@ -1,26 +1,33 @@
-using CMS.DragSystem;
-using CMS.EntryPoint;
-using CMS.Life;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering;
+using CMS.DragSystem;
+using CMS.EnemySystem;
+using CMS.PlayerSystem;
+using CMS.EntryPoint;
+using CMS.Life;
+using UnityEngine.UI;
 
 namespace CMS.TurnSystem
 {
     public class Turn : CompositeRoot
     {
+        [SerializeField] private Button _button;
+
         private Board _board;
-        private LifeManager _lifeManager;
+        private Player _player;
+        private Enemy _enemy;
 
         public override void Init()
         {
             _board = Root.Main.Get<Board>();
-            _lifeManager = Root.Main.Get<LifeManager>();
+            _player = Root.Main.Get<Player>();
+            _enemy = Root.Main.Get<Enemy>();
         }
 
         [ContextMenu("fef")]
         public void OnTurn()
         {
+            _button.interactable = false;
             StartCoroutine(TurnRoutine());
         }
 
@@ -29,16 +36,7 @@ namespace CMS.TurnSystem
             yield return Attacking(true);
             yield return new WaitForSeconds(1);
             yield return Attacking(false);
-
-            if (PlayerIsWinner())
-            {
-                Debug.Log("PlayerWin");
-            }
-
-            if (GameHasEnded())
-            {
-                Debug.Log("GameHasEnded");
-            }
+            _button.interactable = true;
         }
 
         private IEnumerator Attacking(bool isPlayer)
@@ -53,25 +51,18 @@ namespace CMS.TurnSystem
                 slot.Card.AttackAnimation();
                 yield return new WaitForSeconds(0.1f);
 
-                if (slot.EnemySlot.Card == null)
+                if (slot.OponentSlot.Card == null)
                 {
-                    yield return _lifeManager.Damage(slot.Card.attack, !isPlayer);
-                    Debug.Log(_lifeManager.Balance);
+                    if (isPlayer)
+                        _enemy.TakeDamage(slot.Card.Attack);
+                    else
+                        _player.TakeDamage(slot.Card.Attack);
+
                     continue;
                 }
 
-                slot.EnemySlot.Card.TakeDamage(slot.Card.attack);
+                slot.OponentSlot.Card.TakeDamage(slot.Card.Attack);
             }
-        }
-
-        private bool PlayerIsWinner()
-        {
-            return _lifeManager.Balance >= 5;
-        }
-
-        private bool GameHasEnded()
-        {
-            return _lifeManager.Balance < 0;
         }
     }
 }

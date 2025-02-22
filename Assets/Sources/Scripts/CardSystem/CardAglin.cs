@@ -1,5 +1,6 @@
 using CMS.DragSystem;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace CMS.CardSystem
@@ -18,17 +19,20 @@ namespace CMS.CardSystem
 
             foreach (var obj in _objects)
             {
-                if (!obj.Dragging && obj.IsSloted == false)
+                if (!obj.Dragging && obj.Sloted == false)
                 {
                     _ailne.Add(obj);
                 }
             }
 
-            var centerOffset = width * (_ailne.Count * 0.5f - 0.5f);
+            float totalWidth = width * (_ailne.Count - 1); // Общая ширина
+            float startX = -totalWidth / 2f;
+
 
             for (var i = 0; i < _ailne.Count; i++)
             {
-                _ailne[i].transform.localPosition = new Vector3(i * width - centerOffset, 0, 0);
+                _ailne[i].transform.localPosition = Vector2.Lerp(_ailne[i].transform.localPosition, new Vector3(startX + i * width, 0, 0), 0.1f);
+
             }
         }
     }

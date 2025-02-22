@@ -7,26 +7,33 @@ namespace CMS.CardSystem
 {
     public class Card : CompositeRoot
     {
-        public Slot slot;
-        public int health;
-        public int attack;
+        public Slot Slot;
+        public int Health;
+        public int Attack;
 
         private float _time = 0.1f;
 
         private void Update()
         {
-            if (slot == null)
+            if (Slot == null)
                 return;
 
-            transform.position = Vector2.Lerp(transform.position, slot.transform.position, _time);
+            transform.position = Vector2.Lerp(transform.position, Slot.transform.position, _time);
+        }
+
+        private IEnumerator Anima()
+        {
+            transform.position += transform.up * 0.5f;
+            yield return new WaitForSeconds(0.6f);
         }
 
         public void TakeDamage(int damage)
         {
-            health -= damage;
+            Health -= damage;
 
-            if (health <= 0)
+            if (Health <= 0)
             {
+                Slot.SetCard(null);
                 Destroy(gameObject);
             }
         }
@@ -36,10 +43,9 @@ namespace CMS.CardSystem
             StartCoroutine(Anima());
         }
 
-        private IEnumerator Anima()
+        public void SetSlot(Slot slot)
         {
-            transform.position += transform.up * 0.5f;
-            yield return new WaitForSeconds(0.6f);
+            this.Slot = slot;
         }
     }
 }

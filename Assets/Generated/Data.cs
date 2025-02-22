@@ -5,5 +5,5 @@ using UnityEngine.UIElements;
 
 public static class Data
 {
-    public static GameObject DragableData => Resources.Load<GameObject>("DragableData");
+    public static Sprite fullCat => Resources.Load<Sprite>("fullCat");
 }

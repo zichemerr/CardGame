@@ -13,8 +13,8 @@ namespace CMS.TurnSystem
         {
             for (int i = 0; i < PlayerSlots.Length; i++)
             {
-                EnemySlots[i].EnemySlot = PlayerSlots[i];
-                PlayerSlots[i].EnemySlot = EnemySlots[i];
+                EnemySlots[i].SetOponentSlot(PlayerSlots[i]);
+                PlayerSlots[i].SetOponentSlot(EnemySlots[i]);
             }
         }
     }

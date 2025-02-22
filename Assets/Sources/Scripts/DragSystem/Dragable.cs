@@ -1,5 +1,4 @@
 using CMS.CardSystem;
-using System.Net.NetworkInformation;
 using UnityEngine;
 
 namespace CMS.DragSystem
@@ -9,22 +8,24 @@ namespace CMS.DragSystem
     {
         public float _time = 0.1f;
         public float _radius;
+        public float smoothTime = 0.3F;
+        public float maxVelocity = 10f;
+        public Vector2 targetPosition;
 
         private Vector2 _startPos;
+        private Overlaper _over;
+        private Vector2 velocity;
+        private Vector2 currentVelocity;
 
-        [HideInInspector] public bool Dragging = false;
-        [HideInInspector] public Card Card;
-        [HideInInspector] public bool IsSloted = false;
+        public Card Card { get; private set; }
+        public bool Dragging { get; private set; } = false;
+        public bool Sloted { get; private set; } = false;
 
-        private void Start()
+        private void Awake()
         {
             Card = GetComponent<Card>();
+            _over = new Overlaper(transform);
             _startPos = transform.position;
-        }
-
-        private void OnMouseDown()
-        {
-            Dragging = true;
         }
 
         private void Update()
@@ -34,13 +35,16 @@ namespace CMS.DragSystem
 
             if (Vector2.Distance(transform.position, _startPos) < 0.01f)
             {
-                if (IsSloted)
+                if (Sloted)
                 {
                     Destroy(this);
                 }
             }
+        }
 
-            transform.position = Vector2.Lerp(transform.position, _startPos, _time);
+        private void OnMouseDown()
+        {
+            Dragging = true;
         }
 
         private void OnMouseDrag()
@@ -48,25 +52,48 @@ namespace CMS.DragSystem
             if (Dragging == false)
                 return;
 
-            Vector2 target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            transform.position = Vector2.Lerp(transform.position, target, _time);
+            targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            MoveXY();
         }
 
         private void OnMouseUp()
         {
+            Slot[] slots = _over.OverlapAll(_radius);
             Dragging = false;
 
-            Collider2D[] colls = Physics2D.OverlapCircleAll(transform.position, _radius);
+            if (slots == null)
+                return;
 
-            foreach (var coll in colls)
+            foreach (var slot in slots)
             {
-                if (coll.TryGetComponent(out Slot slot))
-                {
-                    _startPos = slot.transform.position;
+                if (slot.Card != null)
+                    continue;
 
-                    Card.slot = slot;
-                    slot.Card = Card;
-                    IsSloted = true;
+                _startPos = slot.transform.position;
+
+                slot.SetCard(Card);
+                Card.SetSlot(slot);
+                Sloted = true;
+            }
+        }
+
+        protected void MoveXY()
+        {
+            if (Vector2.Distance(transform.position, targetPosition) > 0.01f || velocity.magnitude > 0.01f)
+            {
+                Vector2 newPosition = Vector2.SmoothDamp(transform.position, targetPosition, ref currentVelocity, smoothTime, maxVelocity, Time.deltaTime);
+                velocity = (newPosition - (Vector2)transform.position) / Time.deltaTime;
+
+                if (velocity.sqrMagnitude > maxVelocity * maxVelocity)
+                {
+                    velocity = velocity.normalized * maxVelocity;
+                }
+
+                transform.position = newPosition + velocity * Time.deltaTime;
+                if (Vector2.Distance((Vector2)transform.position, targetPosition) < 0.01f && velocity.magnitude < 0.01f)
+                {
+                    transform.position = new Vector3(targetPosition.x, targetPosition.y, transform.position.z);
+                    velocity = Vector2.zero;
                 }
             }
         }

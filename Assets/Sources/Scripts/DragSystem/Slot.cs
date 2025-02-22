@@ -6,7 +6,17 @@ namespace CMS.DragSystem
 {
     public class Slot : MonoBehaviour
     {
-        public CardSystem.Card Card;
-        public Slot EnemySlot;
+        public Card Card;
+        public Slot OponentSlot { get; private set; }
+
+        public void SetCard(Card card)
+        {
+            Card = card;
+        }
+
+        public void SetOponentSlot(Slot slot)
+        {
+            OponentSlot = slot;
+        }
     }
 }
