@@ -1,63 +1,40 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace CMS.EntryPoint
+namespace MerJame.Locator
 {
     public class ServiceLocator<T> : IServiceLocator<T>
     {
         protected Dictionary<Type, T> _itemsMap { get; }
-        protected Dictionary<int, T> _itemsId { get; }
 
         public ServiceLocator()
         {
             _itemsMap = new Dictionary<Type, T>();
-            _itemsId = new Dictionary<int, T>();
         }
 
-        public TP Get<TP>(int id = -1) where TP : T
+        public TP Get<TP>() where TP : T
         {
             var type = typeof(TP);
 
-            if (id == -1)
+            if (_itemsMap.ContainsKey(type) == false)
             {
-                if (_itemsMap.ContainsKey(type) == false)
-                {
-                    throw new Exception($"ÈÄÈ Â ÊÓÊÀÉ Ãåò {type.Name}");
-                }
-
-                return (TP)_itemsMap[type];
+                throw new Exception($"ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ {type.Name}");
             }
 
-            if (_itemsId.ContainsKey(id) == false)
-            {
-                throw new Exception($"ÈÄÈ Â ÊÓÊÀÉ Ãåò {type.Name}");
-            }
-
-            return (TP)_itemsId[id];
+            return (TP)_itemsMap[type];
         }
 
-        public TP Register<TP>(TP service, int id = -1) where TP : T
+        public TP Register<TP>(TP service) where TP : T
         {
             var type = service.GetType();
 
-            if (id == -1)
+            if (_itemsMap.ContainsKey(type))
             {
-                if (_itemsMap.ContainsKey(type))
-                {
-                    throw new Exception($"ÈÄÈ Â ÊÓÊÀÉ Register {type.Name}");
-                }
-
-                _itemsMap[type] = service;
-
-                return service;
+                throw new Exception($"ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ {type.Name}");
             }
 
-            if (_itemsId.ContainsKey(id))
-            {
-                throw new Exception($"ÈÄÈ Â ÊÓÊÀÉ Register {type.Name}");
-            }
-
-            _itemsId[id] = service;
+            _itemsMap[type] = service;
 
             return service;
         }

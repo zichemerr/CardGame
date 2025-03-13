@@ -1,4 +1,4 @@
-﻿namespace CMS.EntryPoint
+﻿namespace MerJame.Locator
 {
     public interface IService
     {
